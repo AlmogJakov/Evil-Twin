@@ -23,8 +23,8 @@ sudo apt-get install ethtool
 * מידע על האיטרפייסים של הכרטיסים המחוברים: sudo /usr/local/sbin/airmon-ng    
 * הפעלת בדיקה על איטרפייס ספציפי והגדרה מחדש: sudo airmon-ng start wlan0    
 * בדיקת הזרקה: sudo aireplay-ng -9 wlan0mon     
-* בדיקת סוגי התקפות (צריך 2 כרטיסים): sudo aireplay-ng -9 -i wlan1mon wlan0mon
-  (כאשר הכרטיס wlan0mon הוא התוקף) 
+* בדיקת סוגי התקפות (צריך 2 כרטיסים): sudo aireplay-ng -9 -i wlan1mon wlan0mon   
+ (כאשר הכרטיס wlan0mon הוא התוקף) 
 
 (בפקודות השם של האיטרפייס הוא wlan0mon/wlan0 אבל מפעילים את הפקודה על השם של האיטרפייס שמצאנו אצלנו)
 
