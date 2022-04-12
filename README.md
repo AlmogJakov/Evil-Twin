@@ -6,8 +6,8 @@
 https://www.aircrack-ng.org/doku.php?id=install_aircrack    
 מריצים את הפקודות תחת Compiling and installing (רץ חלק אם יש את כל הדרישות)
     
-פקודות להתקנת הדרישות:    
-sudo apt-get update -y (מעדכן מידע על חבילות)    
+פקודות להתקנת הדרישות (אם צריך):    
+אפשר להריץ לפני: sudo apt-get update -y (מעדכן מידע על חבילות)    
 sudo apt-get install libz-dev    
 sudo apt-get install libssl-dev    
 sudo apt-get install ethtool    
