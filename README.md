@@ -20,7 +20,7 @@ sudo apt-get install ethtool
 --------------------------------------------------------------------------------------------------    
 בדיקת הזרקה: https://www.aircrack-ng.org/doku.php?id=injection_test    
 
-* מידע על האיטרפייסים של הכרטיסים המחוברים: sudo /usr/local/sbin/airmon-ng    
+* מידע על האיטרפייסים של הכרטיסים המחוברים: sudo /usr/local/sbin/airmon-ng או sudo /usr/sbin/airmon-ng   
   במידה ולא נמצא ניתן לחפש את הנתיב כך: find / -name airmon-ng   
 * הפעלת בדיקה על איטרפייס ספציפי והגדרה מחדש: sudo airmon-ng start wlan0    
 * בדיקת הזרקה: sudo aireplay-ng -9 wlan0mon     
