@@ -4,7 +4,8 @@ import pandas
 import time
 import os
 
-# RUN EXAMPLE: sudo /bin/python3.8 /home/user/Documents/test.py
+# RUN EXAMPLE: sudo /bin/python3.8 /home/user/Documents/WiFiScanner.py
+# RUN EXAMPLE: sudo python3 WiFiScanner.py
 # (Should run with 'sudo')
 # Source: https://www.thepythoncode.com/code/building-wifi-scanner-in-python-scapy
 
