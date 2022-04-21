@@ -16,21 +16,28 @@ networks = pandas.DataFrame(columns=cols, dtype=object)
 networks.set_index("BSSID", inplace=True)
 
 def callback(packet):
+    # Packet Details: https://scapy.readthedocs.io/en/latest/api/scapy.packet.html
     if packet.haslayer(Dot11Beacon):
-        # extract the MAC address of the network
+        # Scapy Layers: https://scapy.readthedocs.io/en/latest/api/scapy.layers.dot11.html
+        # Scapy Layers Implementation: https://github.com/secdev/scapy/blob/master/scapy/layers/dot11.py
+        # packet.show()
+        # Details: https://witestlab.poly.edu/blog/802-11-wireless-lan-2/
+        # extract the MAC address of the network (address 2 = address mac of the transmitter)
         bssid = packet[Dot11].addr2
         # get the name of it
-        ssid = packet[Dot11Elt].info.decode()
+        ssid = packet[Dot11Elt].info.decode() # A Generic 802.11 Element
         try:
             dbm_signal = packet.dBm_AntSignal
         except:
             dbm_signal = "N/A"
         # extract network stats
         stats = packet[Dot11Beacon].network_stats()
+        # Dot11Beacon class extend _Dot11EltUtils class which contains 'network_stats' method
+
         # get the channel of the AP
         channel = stats.get("channel")
         # get the crypto
-        crypto = stats.get("crypto")
+        crypto = stats.get("crypto") # The type of network encryption
         networks.loc[bssid] = (ssid, dbm_signal, channel, crypto)
 
 
@@ -51,8 +58,19 @@ def change_channel():
 
 
 if __name__ == "__main__":
-    # interface name, check using iwconfig
-    interface = "wlan0mon"
+    # Source: https://stackoverflow.com/questions/3837069/how-to-get-network-interface-card-names-in-python
+    interfaces = os.listdir('/sys/class/net/')
+    print("Interfaces:")
+    for (i, item) in enumerate(interfaces, start=1):
+        print("   " + str(i) + ". " + item)
+    val = input("Please Choose Interface: ")
+    while True:
+        try:
+            choose = int(val)
+            interface = interfaces[choose - 1]
+            break
+        except:
+            val = input("Please Choose Again: ")
     # start the thread that prints all the networks
     printer = Thread(target=print_all)
     printer.daemon = True
@@ -62,4 +80,5 @@ if __name__ == "__main__":
     channel_changer.daemon = True
     channel_changer.start()
     # start sniffing
-    sniff(prn=callback, iface=interface)
+    sniff(prn=callback, iface=interface, timeout=60)
+    # Details: https://0xbharath.github.io/art-of-packet-crafting-with-scapy/scapy/sniffing/index.html
