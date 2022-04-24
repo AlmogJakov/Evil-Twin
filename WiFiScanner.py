@@ -145,7 +145,7 @@ if __name__ == "__main__":
     # Source: https://stackoverflow.com/questions/32850022/how-to-stop-os-system-in-python
     # Use airodump-ng for packet capturing - save the MAC address of the clients in csv file. 
     print("\nPacket capturing:\n")
-    proc = subprocess.Popen(['airodump-ng', 'wlan0mon','--bssid',net["BSSID"], '-c',str(net["Channel"]),
+    proc = subprocess.Popen(['airodump-ng', interface,'--bssid',net["BSSID"], '-c',str(net["Channel"]),
     '--write','clients','--output-format', 'csv'])
     time.sleep(20) # <-- time of scanning
     proc.terminate() # <-- terminate the process
