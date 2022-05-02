@@ -89,6 +89,7 @@ if __name__ == "__main__":
             break
         except:
             val = input("Please Choose Again: ")
+    print('Looking for networks.....')
 
     # 3. Enable monitor mode
     os.system(f'sudo ifconfig {interface} down')
@@ -117,16 +118,22 @@ if __name__ == "__main__":
     while True:
         try:
             net = networks.loc[int(val)]
-            break
         except:
             val = input("Please Choose Again Network: ")
+            continue
 
-    # 9. Print the Users
-    i = 1
-    gateway_mac = str(net[0])
-    for n in user[gateway_mac]:
-        print(str(i) + ' ' + n)
-        i += 1
+        # 9. Print the Users
+        i = 1
+        gateway_mac = str(net[0])
+        if gateway_mac in user:
+            for n in user[gateway_mac]:
+                print(str(i) + ' ' + n)
+                i += 1
+            break
+        else:
+            print('This network was no user:', gateway_mac)
+            val = input("Please Choose Again Network: ")
+
 
     # 10. Choose the Client to attack
     val = input("\nPlease enter the index of the client you want to attack: ")
