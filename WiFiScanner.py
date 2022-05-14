@@ -109,7 +109,7 @@ def evil_twin():
     disable_monitor_mode(interface)
     disable_monitor_mode(interface_fake)
     if flag_div:
-        os.system(f"iw dev mon0 {interface} del")
+        os.system("sudo iw dev mon0 interface del")
 
 
 if __name__ == "__main__":
@@ -215,7 +215,7 @@ if __name__ == "__main__":
     # 6. Stop changing channel thread
     stop_threads = True
 
-    # 7 Check if any clients found
+    # 7 Check if any networks found
     if networks.iloc[:, :]["BSSID"].empty:
         print("\nNo Networks Found! Aborting the process...")
         sys.exit(1)
@@ -239,14 +239,14 @@ if __name__ == "__main__":
                 i += 1
             break
         else:
-            print('This network was no user:', gateway_mac)
+            print('This network has no user:', gateway_mac)
             net_val = input("Please Choose Again Network: ")
 
     # 10. Choose the Client to attack/defense
     val = input(f"\nPlease enter the index of the client you want to {action}: ")
     while True:
         try:
-            client = int(val)
+            client_index = int(val)
             break
         except:
             val = input("Please Choose Again: ")
@@ -254,9 +254,9 @@ if __name__ == "__main__":
     # 11. Get the Client we choose
     i = 1
     target_mac = ''
-    for n in user[gateway_mac]:
-        if i == client:
-            target_mac = n
+    for client in user[gateway_mac]:
+        if i == client_index:
+            target_mac = client
             break
         i += 1
 
