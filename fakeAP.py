@@ -61,6 +61,7 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     f"interface={interface}\n"\
     f"domain=localnet\n"\
     f"dhcp-range=192.168.24.50,192.168.24.250,2h\n"\
+    f"address=/www.google.com/216.58.209.2\n"\
     f"address=/#/{CAPTIVEPORTAL_IP}\n"\
     f"dhcp-option=1,255.255.255.0\n"\
     f"dhcp-option=3,{CAPTIVEPORTAL_IP}\n"\
@@ -85,7 +86,9 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     os.system('iptables --table nat --delete-chain')
 
     # Redirect any request to the captive portal
-    os.system(f'iptables -t nat -A PREROUTING -i {internet_interface} -p tcp -m multiport --dport 80,443 -j DNAT --to-destination {CAPTIVEPORTAL_IP}:80')
+    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 80 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}:80')
+    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 443 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}:80')
+    #os.system(f'iptables -t nat -A PREROUTING -i {internet_interface} -p tcp -m multiport --dport 80,443 -j DNAT --to-destination {CAPTIVEPORTAL_IP}:80')
     
     # Enable internet access use the second interface
     os.system(f'iptables -A FORWARD --in-interface {interface} -j ACCEPT')
