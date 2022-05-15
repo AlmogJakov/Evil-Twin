@@ -3,6 +3,7 @@ import sys
 import pathlib
 import subprocess
 import time
+from UI import *
 from threading import Thread
 
 
@@ -129,6 +130,6 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
 
 
 if __name__ == "__main__":
-
+    printFakeApWelcome()
     openAP(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
     os.system('cat /var/www/html/client_data.txt >> client_data.txt')
