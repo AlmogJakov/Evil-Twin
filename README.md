@@ -11,7 +11,7 @@ An evil twin attack is a spoofing cyberattack that works by tricking users into 
 <h3>Checking Wifi Adapter</h3>   
 Install Details: https://www.aircrack-ng.org/doku.php?id=install_aircrack (Under Compiling and installing)   
 
-Dependencies:   
+AirCrack Dependencies:   
 - 'sudo apt-get update -y'   
 - 'sudo apt-get install libz-dev'   
 - 'sudo apt-get install libssl-dev'   
@@ -33,3 +33,22 @@ Checking attack types (2 cards are needed): 'sudo aireplay-ng -9 -i wlan1mon wla
     (When the attacking card is wlan0mon)   
     
  Should run before: 'sudo airmon-ng check kill'   
+ 
+ 
+ --------------------------------------------------------------------------------------------------
+
+<h3>Requirements</h3>   
+
+- python3   
+- pandas   
+- numpy   
+- scapy   
+- hostapd   
+- dnsmasq
+- iptables   
+- net-tools   
+- apache2   
+- apache2 php (libapache2-mod-php)
+
+ --------------------------------------------------------------------------------------------------
+ 
