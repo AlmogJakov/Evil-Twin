@@ -44,7 +44,6 @@ def search_fake_ap(packet):
         # Extract the MAC address of the network (address 2 = address mac of the transmitter)
         bssid = packet[Dot11].addr2
         if str(ssid) == NetworkDetails.right_network_ssid and str(bssid) != NetworkDetails.right_network:
-            print('hii')
             NetworkDetails.fake_ap = bssid
             Var.stop_threads = True
 
@@ -97,7 +96,7 @@ def sniffing(interface, callback, timeout=False):
     # Start sniffing (Synchronous process)
     s = AsyncSniffer(prn=callback, iface=interface)
     if timeout:
-        s = AsyncSniffer(prn=callback, iface=interface, timeout=2) # ,
+        s = AsyncSniffer(prn=callback, iface=interface, timeout=20) # ,
     s.start()
 
     # Set timer
@@ -133,6 +132,6 @@ def defense(interface: str, net, user: str):
         # DDoS Attack
         if NetworkDetails.fake_ap != '':
             print('\nDDoS Attack!')
-            DDoS(interface, NetworkDetails.fake_ap, 10)
+            DDoS(interface, NetworkDetails.fake_ap, 40)
 
         Var.stop_threads = False

