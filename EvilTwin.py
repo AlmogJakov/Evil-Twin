@@ -93,7 +93,7 @@ def evil_twin():
     # 12. Fake AP
     fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
                   net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_internet + ' ' + interface_fake + ';"$SHELL'
-    #print(fake_ap_cmd)
+    print(fake_ap_cmd)
     os.system(fake_ap_cmd)
 
     # 13. User attack

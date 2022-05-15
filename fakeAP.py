@@ -26,6 +26,9 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     # Source: https://andrewwippler.com/2016/03/11/wifi-captive-portal/
     # Source: https://wiki.andybev.com/doku.php?id=using_iptables_and_php_to_create_a_captive_portal
     # Source: https://unix.stackexchange.com/questions/132130/iptables-based-redirect-captive-portal-style
+    CAPTIVEPORTAL_IP = "10.0.0.1"
+    CAPTIVEPORTAL_IP = "192.168.24.1"
+
 
     # enable monitor mode
     os.system(f'sudo ifconfig {interface} down')
@@ -58,8 +61,34 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     file1.close()
 
     conf_text = f"interface={interface}\ndhcp-range=192.168.24.25,192.168.24.50,255.255.255.0,12h"\
-    "\ndhcp-option=3,192.168.24.1\ndhcp-option=6,192.168.24.1"\
-    f"\nserver=8.8.8.8\nlog-queries\nlog-dhcp\naddress=/www.google.com/216.58.209.2\naddress=/#/192.168.24.1\nlisten-address=127.0.0.1"
+    f"\ndhcp-option=3,{CAPTIVEPORTAL_IP}\ndhcp-option=6,{CAPTIVEPORTAL_IP}"\
+    f"\nserver=8.8.8.8\nlog-queries\nlog-dhcp\naddress=/www.google.com/216.58.209.2\naddress=/#/{CAPTIVEPORTAL_IP}\nlisten-address=127.0.0.1"
+    # conf_text = f"interface={interface}\n#Set the ip range that can be given to clients\n\
+    # dhcp-range={CAPTIVEPORTAL_IP}0,{CAPTIVEPORTAL_IP}00,8h\n#Set the gateway IP address\ndhcp-option=3,{CAPTIVEPORTAL_IP}\n\
+    # #Set dns server address\ndhcp-option=6,{CAPTIVEPORTAL_IP}\n#Redirect all requests to {CAPTIVEPORTAL_IP}\naddress=/#/{CAPTIVEPORTAL_IP}"
+
+    conf_text = \
+    f"bogus-priv\n"\
+    f"server=/localnet/{CAPTIVEPORTAL_IP}\n"\
+    f"local=/localnet/\n"\
+    f"interface={interface}\n"\
+    f"domain=localnet\n"\
+    f"dhcp-range=192.168.24.50,192.168.24.250,2h\n"\
+    f"address=/#/{CAPTIVEPORTAL_IP}\n"\
+    f"dhcp-option=1,255.255.255.0\n"\
+    f"dhcp-option=3,{CAPTIVEPORTAL_IP}\n"\
+    f"dhcp-option=6,{CAPTIVEPORTAL_IP}\n"
+    f"dhcp-authoritative\n"
+    
+    # f"dhcp-range=192.168.24.25,192.168.24.50,255.255.255.0,12h\n"\
+    # f"dhcp-range=1,255.255.255.0\n"\
+    # f"dhcp-range=3,{CAPTIVEPORTAL_IP}\n"\
+    # f"dhcp-range=6,{CAPTIVEPORTAL_IP}"
+
+    # os.system(f"echo \"net.ipv4.ip_forward=1\" >> /etc/sysctl.conf")
+
+
+
     conf_file = open("dnsmasq.conf", "w")
     conf_file.write(conf_text)
     conf_file.close()
@@ -69,7 +98,8 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
 
 
     # AP with address 192.168.24.1 on the given interface
-    os.system(f"ifconfig {interface} up 192.168.24.1 netmask 255.255.255.0")
+    # os.system(f"ifconfig {interface} up 192.168.24.1 netmask 255.255.255.0")
+    os.system(f"ifconfig {interface} up {CAPTIVEPORTAL_IP} netmask 255.255.255.0")
 
     
     # # Clear all IP Rules
@@ -79,14 +109,46 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     os.system('iptables --table nat --delete-chain')
 
 
+    # os.system(f'iptables -t mangle -N captiveportal')
+    # os.system(f'iptables -t mangle -A PREROUTING -i {interface} -p udp --dport 53 –j RETURN')
+    # os.system(f'iptables -t mangle -A PREROUTING -i {interface} -j captiveportal')
+    # os.system(f'iptables -t mangle -A captiveportal -j MARK --set-mark 1')
+    # os.system(f'iptables -t nat -A PREROUTING -i {interface}  -p tcp -m mark --mark 1 -j DNAT --to-destination {CAPTIVEPORTAL_IP}')
+    # os.system(f'sysctl -w net.ipv4.ip_forward=1')
+    # os.system(f'iptables -A FORWARD -i {interface} -j ACCEPT')
+    # os.system(f'iptables -t nat -A POSTROUTING -o {internet_interface} -j MASQUERADE')
+
+
     # Redirect any request to the captive portal
-    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 80 -j DNAT  --to-destination 192.168.24.1')
-    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 443 -j DNAT  --to-destination 192.168.24.1')
+    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 80 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}')
+    os.system(f'iptables -t nat -A PREROUTING  -i {internet_interface} -p tcp --dport 443 -j DNAT  --to-destination {CAPTIVEPORTAL_IP}')
 
 
     # Enable internet access use the second interface
     os.system(f'iptables -A FORWARD --in-interface {interface} -j ACCEPT')
     os.system(f'iptables -t nat -A POSTROUTING --out-interface {internet_interface} -j MASQUERADE')
+
+
+
+
+    # The next section is required only if you are wanting to access the internet through the ethernet connection.
+    #os.system(f'sudo iptables -t nat -A  POSTROUTING -o {internet_interface} -j MASQUERADE')
+    
+
+    os.system(f'chmod +x initSoftAP')
+    os.system(f'sudo ./initSoftAP {interface} {internet_interface}')
+    # https://askubuntu.com/questions/451708/php-script-not-executing-on-apache-server
+    # sudo apt-get install apache2 php5 libapache2-mod-php5
+
+
+
+
+
+    # os.system(f'iptables -t nat -A POSTROUTING -o {internet_interface} -j MASQUERADE')
+    # os.system(f'iptables -A FORWARD -i eth0 -o {interface} -m state --state RELATED,ESTABLISHED -j ACCEPT')
+    # os.system(f'iptables -A FORWARD -i {interface} -o {internet_interface} -j ACCEPT')
+    # os.system(f'iptables -A INPUT -j ACCEPT >> /dev/null 2>&1')
+    # os.system(f'iptables -A OUTPUT -j ACCEPT >> /dev/null 2>&1')
 
     
     # Enable IP forwarding from one interface to another
@@ -105,7 +167,7 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     os.system('sudo rm -r /var/www/html/')
     os.system('sudo cp -r web /var/www/html/')
     os.system('chmod 777 /var/www/html/client_data.txt')
-    os.system('route add default gw 192.168.24.1')
+    os.system(f'route add default gw {CAPTIVEPORTAL_IP}')
     # Enable rewrite and override for .htaccess and php
     os.system('sudo cp -f 000-default.conf /etc/apache2/sites-enabled/')
     os.system('a2enmod rewrite')
@@ -113,8 +175,8 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     os.system('service apache2 restart')
 
     # Link hostpad to the configuration file.
-    os.system("hostapd hostapd.conf;")
-
+    os.system("hostapd hostapd.conf")
+    
     # Reset all setting to defualt
     os.system("systemctl enable systemd-resolved.service >/dev/null 2>&1") 
     os.system("systemctl start systemd-resolved >/dev/null 2>&1") 
