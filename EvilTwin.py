@@ -20,8 +20,8 @@ from defense import defense
 
 warnings.filterwarnings('ignore')
 
-# RUN EXAMPLE: sudo python3 WiFiScanner.py
-# RUN EXAMPLE: sudo /bin/python3.8 /home/user/Documents/WiFiScanner.py
+# RUN EXAMPLE: sudo python3 EvilTwin.py
+# RUN EXAMPLE: sudo /bin/python3.8 /home/user/Documents/EvilTwin.py
 # (Should run with 'sudo')
 # Sources can be found here: https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/fc91a2ffe9c7dc98ee32072a3bc1d8fb9bb08943/WiFiScanner.py
 
