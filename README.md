@@ -27,7 +27,7 @@ The following requirements are required for running the program
 | ------------- | ------------- | ------------- | ------------- |
 | <b>python3</b> | <b>pandas</b> | <b>numpy</b> | <b>scapy</b>  |
 | <b>hostapd</b> | <b>dnsmasq</b> | <b>iptables</b> | <b>net-tools</b> |
-| <b>apache2</b> | <b>apache2 php (libapache2-mod-php)</b> | | |
+| <b>apache2</b> | <b>php (libapache2-mod-php)</b> | | |
  
   --------------------------------------------------------------------------------------------------
 
