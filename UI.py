@@ -12,9 +12,12 @@ def printWelcome():
     ">  |  __)   ( (   ) )   | |   | |      | |   | |( )| |   | |   | (\\ \\) |\r\n"
     ">  | (       \\ \\_/ /    | |   | |      | |   | || || |   | |   | | \\   |\r\n"
     ">  | (____/\\  \\   /  ___) (___| (____/\\| |   | () () |___) (___| )  \\  |\r\n"
-    ">  (_______/   \\_/   \\_______/(_______/)_(   (_______)\\_______/|/    )_)\n\n"
-    "   Utility by Elhay Mantzbah, Itay Rafee, Almog Jakov\n"
-    "   #####################################################################\n\n")
+    ">  (_______/   \\_/   \\_______/(_______/)_(   (_______)\\_______/|/    )_)\n>\n"
+    ">   ____________________________________________________\n"
+    ">  |                                                    |\n"
+    ">  | Utility by Elhay Mansbach, Itay Rafee, Almog Jakov |\n"
+    ">  |____________________________________________________|\n>\n"
+    ">  (Ctrl-C to abort settings & exit the utility)\n\n")
 
 
 def printFakeApWelcome():
@@ -42,12 +45,12 @@ def loadingProgressBar(timeout, first, last):
     items = list(range(0, 100))
     l = len(items)
     # Initial call to print 0% progress
-    printProgressBar(0, l, prefix = ">  "+first+":", suffix = last, length = 40)
+    printProgressBar(0, l, prefix = ">  "+first+":", suffix = last, length = 46)
     for i, item in enumerate(items):
         # Do stuff...
         time.sleep(timeout/100)
         # Update Progress Bar
-        printProgressBar(i + 1, l, prefix = ">  "+first+":", suffix = last, length = 40)
+        printProgressBar(i + 1, l, prefix = ">  "+first+":", suffix = last, length = 46)
     print('')
 
 # https://stackoverflow.com/questions/3173320/text-progress-bar-in-terminal-with-block-characters

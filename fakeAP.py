@@ -94,12 +94,16 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     os.system(f'iptables -A FORWARD --in-interface {interface} -j ACCEPT')
     os.system(f'iptables -t nat -A POSTROUTING --out-interface {internet_interface} -j MASQUERADE')
 
-    # init additional AP settings
-    os.system(f'chmod +x initSoftAP')
-    os.system(f'sudo ./initSoftAP {interface} {internet_interface}')
+    # Initial wifi interface configuration (seems to fix problems)
+    os.system(f'ip link set {interface} down')
+    os.system(f'ip addr flush dev {interface}')
+    os.system(f'ip link set {interface} up')
+    os.system(f'ip addr add 192.168.24.1/24 dev {interface}')
+    os.system(f'sleep 3')
+    # Or try to init additional AP settings
+    # os.system(f'chmod +x initSoftAP')
+    # os.system(f'sudo ./initSoftAP {interface} {internet_interface}')
     # https://askubuntu.com/questions/451708/php-script-not-executing-on-apache-server
-    # Run sudo apt-get install apache2 php libapache2-mod-php
-    # OR sudo apt-get install apache2 php5 libapache2-mod-php5
 
     # Enable IP forwarding from one interface to another
     os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
@@ -137,6 +141,10 @@ def openAP(net_ssid,net_channel,internet_interface,interface):
     os.system("sudo rm hostapd.conf dnsmasq.conf")
 
 
+# Requirements:
+# 1. apache2
+# 2. php (Run sudo apt-get install apache2 php libapache2-mod-php
+#         OR sudo apt-get install apache2 php5 libapache2-mod-php5)
 if __name__ == "__main__":
     printFakeApWelcome()
     print(f'if failed try \"nmcli device set {sys.argv[4]} managed no\"')

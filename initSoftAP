@@ -2,14 +2,15 @@
 # Usage: ./initSoftAP
 # Source: https://nims11.wordpress.com/2012/04/27/hostapd-the-linux-way-to-create-virtual-wifi-access-point/comment-page-8/
 ########### Initial wifi interface configuration #############
-# ip link set $1 down
-# ip addr flush dev $1
-# ip link set $1 up
+ip link set $1 down
+ip addr flush dev $1
+ip link set $1 up
+ip addr add 192.168.24.1/24 dev $1
 # ip addr add 10.0.0.1/24 dev $1
  
 # If you still use ifconfig for some reason, replace the above lines with the following
 # ifconfig $1 up 10.0.0.1 netmask 255.255.255.0
-sleep 2
+sleep 5
 ###########
  
 ########### Start dnsmasq ##########
