@@ -72,3 +72,28 @@ The following requirements are required for running the program
  <b>Error:</b> Failed to set beacon parameters   
  <b>Solution:</b> Disable NetworkAdapter from managing the interface via 'nmcli device set {NAME} managed no'   
  
+  --------------------------------------------------------------------------------------------------
+ 
+  <h3>Screenshots</h3>    
+  
+ 
+| Welcome Screen  |
+| ------------- |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/welcome.jpg"/></p>  |
+
+
+| Network Scanning Screen  |
+| ------------- |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/scanning.jpg"/></p>  |
+
+
+| Deauthentication Attack Screen  |
+| ------------- |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/deauth.jpg"/></p>  |
+
+
+| Fake AP Screen  |
+| ------------- |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/fakeap.jpg"/></p>  |
+
+  --------------------------------------------------------------------------------------------------
