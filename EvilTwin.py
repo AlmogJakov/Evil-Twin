@@ -147,7 +147,7 @@ def abortSettings():
 
 
 def divideInterface(interfaces):
-    val = input("\nPlease Choose an Interface above for Dividing: ")
+    val = input("Please Choose an Interface above for Dividing: ")
     while True:
             try:
                 choose = int(val)
@@ -156,9 +156,10 @@ def divideInterface(interfaces):
                 os.system(f"sudo iwconfig mon0 freq 2.484G")
                 os.system(f"sudo ifconfig mon0 up")
                 os.system(f"sleep 1")
+                # can abort by 'sudo iw dev mon0 del'
                 new_interfaces = os.listdir('/sys/class/net/')
                 flag_divided = True
-                print("Completed! Run \'sudo iw dev mon0 del\' to remove the interface")
+                print("Dividing Completed! \n(The divided Interface be automatically deleted by pressing Ctrl-c)")
                 print("\nInterfaces:")
                 for (i, item) in enumerate(new_interfaces, start=1):
                     print("   " + str(i) + ". " + item)
@@ -196,6 +197,16 @@ if __name__ == "__main__":
     for (i, item) in enumerate(interfaces, start=1):
         print("   " + str(i) + ". " + item)
     print()
+
+    flag_divided = False
+    # interface dividing
+    div = input("Do u want to divide interface? (Y-yes, else-no): ")
+    print()
+    if div == "Y":
+        interfaces = divideInterface(interfaces)
+        flag_divided = True
+
+
     val = input(f"Please Choose Interface for {action}: ")
 
     # 2.1 Choose card interface to attack/defense with
@@ -221,21 +232,15 @@ if __name__ == "__main__":
                 val2 = input("Please Choose Interface for Fake AP Again: ")
 
         # 2.3. Choose card interface to give internet access for the Fake AP
-        val3 = input("Please Choose Interface for Internet Access (-1 to divide): ")
-        flag_divided = False
+        val3 = input("Please Choose Interface for Internet Access: ")
         while True:
             try:
                 choose = int(val3)
-                if choose == -1:
-                    interfaces = divideInterface(interfaces)
-                    flag_divided = True
-                    val3 = input("Please Choose Interface for Internet Access: ")
-                else:
-                    choosed_interface = interfaces[choose - 1]
-                    if choosed_interface == interface_attack or choosed_interface == interface_fake:
-                        raise Exception()
-                    interface_internet = choosed_interface
-                    break
+                choosed_interface = interfaces[choose - 1]
+                if choosed_interface == interface_attack or choosed_interface == interface_fake:
+                    raise Exception()
+                interface_internet = choosed_interface
+                break
             except:
                 val3 = input("Please Choose Interface for Internet Access Again: ")
 

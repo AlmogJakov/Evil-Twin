@@ -15,7 +15,7 @@ def printWelcome():
     ">  (_______/   \\_/   \\_______/(_______/)_(   (_______)\\_______/|/    )_)\n>\n"
     ">   ____________________________________________________\n"
     ">  |                                                    |\n"
-    ">  | Utility by Elhay Mansbach, Itay Rafee, Almog Jakov |\n"
+    ">  | Utility by Elhai Mansbach, Itay Rafee, Almog Jakov |\n"
     ">  |____________________________________________________|\n>\n"
     ">  (Ctrl-C to abort settings & exit the utility)\n\n")
 
