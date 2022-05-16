@@ -68,7 +68,7 @@ Checking attack types (2 cards are needed): 'sudo aireplay-ng -9 -i wlan1mon wla
 | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/scanning.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/welcome.jpg"/></p>  |
 
 
-| Fake AP Screen | Deauthentication Attack Screen |
+| Fake AP Screen | Deauth Attack Screen |
 | ------------- | ------------- |
 | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/fakeap.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/deauth.jpg"/></p>  |
 
