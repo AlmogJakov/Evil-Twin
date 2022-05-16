@@ -48,6 +48,7 @@ The following requirements are required for running the program
     * Additional wired internet interface
     * Interface created by splitting one of the interfaces of the network adapters above
 
+* for checking adapter supported options run 'iw list'
 
 <b>Software requirements:</b>
 - python3   
@@ -62,4 +63,11 @@ The following requirements are required for running the program
 - apache2 php (libapache2-mod-php)
 
  --------------------------------------------------------------------------------------------------
+ 
+ <h3>Common P</h3>    
+ 
+ Error: Could not set interface flags (UP): No such device   
+ Solution: Re-plug the adapter   
+ Error: Failed to set beacon parameters   
+ Solution: Disable NetworkAdapter from managing the interface via 'nmcli device set {NAME} managed no'   
  
