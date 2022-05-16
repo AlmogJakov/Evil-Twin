@@ -22,16 +22,12 @@ The following requirements are required for running the program
 * for checking adapter supported options run 'iw list'
 
 <b>Software requirements:</b>
-- python3   
-- pandas   
-- numpy   
-- scapy   
-- hostapd   
-- dnsmasq
-- iptables   
-- net-tools   
-- apache2   
-- apache2 php (libapache2-mod-php)
+
+|||||
+| ------------- | ------------- | ------------- | ------------- |
+| <b>python3</b> | <b>pandas</b> | <b>numpy</b> | <b>scapy</b>  |
+| <b>hostapd</b> | <b>dnsmasq</b> | <b>iptables</b> | <b>net-tools</b> |
+| <b>apache2</b> | <b>apache2 php (libapache2-mod-php)</b> | | |
  
   --------------------------------------------------------------------------------------------------
 
