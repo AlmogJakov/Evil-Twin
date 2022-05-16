@@ -202,7 +202,7 @@ if __name__ == "__main__":
     # interface dividing
     div = input("Do u want to divide interface? (Y-yes, else-no): ")
     print()
-    if div == "Y":
+    if div == "Y" or div == "y":
         interfaces = divideInterface(interfaces)
         flag_divided = True
 
