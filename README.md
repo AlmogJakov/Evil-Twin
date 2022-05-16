@@ -1,6 +1,6 @@
 # Evil Twin Attack & Defending
 
-<p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/evil_twin.jpg"/></p>
+<p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/demos/evil_twin.jpg"/></p>
 
 --------------------------------------------------------------------------------------------------
 
@@ -67,12 +67,12 @@ Checking attack types (2 cards are needed): 'sudo aireplay-ng -9 -i wlan1mon wla
  
 | Network Scanning Screen | Welcome Screen |
 | ------------- | ------------- |
-| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/scanning.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/welcome.jpg"/></p>  |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/demos/scanning.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/demos/welcome.jpg"/></p>  |
 
 
 | Fake AP Screen | Deauth Attack Screen |
 | ------------- | ------------- |
-| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/fakeap.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/deauth.jpg"/></p>  |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/demos/fakeap.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/demos/deauth.jpg"/></p>  |
 
   --------------------------------------------------------------------------------------------------
  
