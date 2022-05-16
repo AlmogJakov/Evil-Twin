@@ -66,8 +66,9 @@ The following requirements are required for running the program
  
  <h3>Troubleshooting</h3>    
  
- Error: Could not set interface flags (UP): No such device   
- Solution: Re-plug the adapter   
- Error: Failed to set beacon parameters   
- Solution: Disable NetworkAdapter from managing the interface via 'nmcli device set {NAME} managed no'   
+ <b>Error:</b> Could not set interface flags (UP): No such device   
+ <b>Solution:</b> Re-plug the adapter   
+    
+ <b>Error:</b> Failed to set beacon parameters   
+ <b>Solution:</b> Disable NetworkAdapter from managing the interface via 'nmcli device set {NAME} managed no'   
  
