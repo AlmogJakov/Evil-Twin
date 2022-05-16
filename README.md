@@ -37,8 +37,19 @@ Checking attack types (2 cards are needed): 'sudo aireplay-ng -9 -i wlan1mon wla
  
  --------------------------------------------------------------------------------------------------
 
-<h3>Requirements</h3>   
+<h3>Requirements</h3>    
 
+The following requirements are required for running the program
+   
+<b>Network hardware requirements:</b>
+1. Network adapter with monitor mode support (used for attack)
+2. Network adapter with AP setup support (used for fake network)
+3. Access the network by one of the following options:
+    * Additional wired internet interface
+    * Interface created by splitting one of the interfaces of the network adapters above
+
+
+<b>Software requirements:</b>
 - python3   
 - pandas   
 - numpy   
