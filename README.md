@@ -44,7 +44,7 @@ The following requirements are required for running the program
 <b>Network hardware requirements:</b>
 1. Network adapter with monitor mode support (used for attack)
 2. Network adapter with AP setup support (used for fake network)
-3. Access the network by one of the following options:
+3. Accessing the network by one of the following interfaces:
     * Additional wired internet interface
     * Interface created by splitting one of the interfaces of the network adapters above
 
