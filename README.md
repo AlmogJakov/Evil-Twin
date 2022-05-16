@@ -8,6 +8,33 @@ An evil twin attack is a spoofing cyberattack that works by tricking users into 
 
 --------------------------------------------------------------------------------------------------
 
+<h3>Requirements</h3>    
+
+The following requirements are required for running the program
+   
+<b>Network hardware requirements:</b>
+1. Network adapter with monitor mode support (used for attack)
+2. Network adapter with AP setup support (used for fake network)
+3. Accessing the network by one of the following interfaces:
+    * Additional wired internet interface
+    * Interface created by splitting one of the interfaces of the network adapters above
+
+* for checking adapter supported options run 'iw list'
+
+<b>Software requirements:</b>
+- python3   
+- pandas   
+- numpy   
+- scapy   
+- hostapd   
+- dnsmasq
+- iptables   
+- net-tools   
+- apache2   
+- apache2 php (libapache2-mod-php)
+ 
+  --------------------------------------------------------------------------------------------------
+
 <h3>Checking Wifi Adapter</h3>   
 Install Details: https://www.aircrack-ng.org/doku.php?id=install_aircrack (Under Compiling and installing)   
 
@@ -36,33 +63,20 @@ Checking attack types (2 cards are needed): 'sudo aireplay-ng -9 -i wlan1mon wla
  
  
  --------------------------------------------------------------------------------------------------
+ 
+  <h3>Screenshots</h3>    
+  
+ 
+| Network Scanning Screen | Welcome Screen |
+| ------------- | ------------- |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/scanning.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/welcome.jpg"/></p>  |
 
-<h3>Requirements</h3>    
 
-The following requirements are required for running the program
-   
-<b>Network hardware requirements:</b>
-1. Network adapter with monitor mode support (used for attack)
-2. Network adapter with AP setup support (used for fake network)
-3. Accessing the network by one of the following interfaces:
-    * Additional wired internet interface
-    * Interface created by splitting one of the interfaces of the network adapters above
+| Fake AP Screen | Deauthentication Attack Screen |
+| ------------- | ------------- |
+| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/fakeap.jpg"/></p>  | <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/deauth.jpg"/></p>  |
 
-* for checking adapter supported options run 'iw list'
-
-<b>Software requirements:</b>
-- python3   
-- pandas   
-- numpy   
-- scapy   
-- hostapd   
-- dnsmasq
-- iptables   
-- net-tools   
-- apache2   
-- apache2 php (libapache2-mod-php)
-
- --------------------------------------------------------------------------------------------------
+  --------------------------------------------------------------------------------------------------
  
  <h3>Troubleshooting</h3>    
  
@@ -71,29 +85,6 @@ The following requirements are required for running the program
     
  <b>Error:</b> Failed to set beacon parameters   
  <b>Solution:</b> Disable NetworkAdapter from managing the interface via 'nmcli device set {NAME} managed no'   
- 
-  --------------------------------------------------------------------------------------------------
- 
-  <h3>Screenshots</h3>    
-  
- 
-| Welcome Screen  |
-| ------------- |
-| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/welcome.jpg"/></p>  |
 
 
-| Network Scanning Screen  |
-| ------------- |
-| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/scanning.jpg"/></p>  |
-
-
-| Deauthentication Attack Screen  |
-| ------------- |
-| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/deauth.jpg"/></p>  |
-
-
-| Fake AP Screen  |
-| ------------- |
-| <p align="center"><img src="https://github.com/AlmogJakov/Protection-of-wireless-and-mobile-networks/blob/main/images/fakeap.jpg"/></p>  |
-
-  --------------------------------------------------------------------------------------------------
+   --------------------------------------------------------------------------------------------------
