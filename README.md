@@ -64,7 +64,7 @@ The following requirements are required for running the program
 
  --------------------------------------------------------------------------------------------------
  
- <h3>Common P</h3>    
+ <h3>Troubleshooting</h3>    
  
  Error: Could not set interface flags (UP): No such device   
  Solution: Re-plug the adapter   
